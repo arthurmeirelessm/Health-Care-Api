@@ -19,51 +19,51 @@ namespace HealthCareApi.Services
     public class UserService : IUserService
     {
 
-        private readonly DataContext _dataContext;
+        private readonly DataContext _context;
 
-        public UserService(DataContext dataContext)
+        public UserService(DataContext dContext)
         {
-            _dataContext = dataContext;
+            _context = dContext;
         }
 
         public async Task<User> Create(User user)
         {
-            User userDb = await _dataContext.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserName == user.UserName);
+            User userDb = await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserName == user.UserName);
 
-            if (userDb is not null)
+            if (userDb != null)
             {
                 throw new Exception($"UserName {user.UserName} already exist.");
             }
-            _dataContext.Users.Add(user);
-            await _dataContext.SaveChangesAsync();
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
             return user;
         }
 
         public async Task Delete(int id)
         {
-            User userDb = await _dataContext.Users.SingleOrDefaultAsync(u => u.Id == id);
+            User userDb = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
 
-            if (userDb is not null)
+            if (userDb == null)
             {
                 throw new Exception($"User {id} not found");
                
             }
-            _dataContext.Users.Remove(userDb);
-            await _dataContext.SaveChangesAsync();
+            _context.Users.Remove(userDb);
+            await _context.SaveChangesAsync();
 
         }
 
         public async Task<List<User>> GetAll()
         {
-            return await _dataContext.Users.ToListAsync();
+            return await _context.Users.ToListAsync();
         }
 
         public async Task<User> GetById(int id)
         {
-            User userDb = await _dataContext.Users.SingleOrDefaultAsync(u => u.Id == id);
+            User userDb = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
 
-            if (userDb is null)
+            if (userDb == null)
             {
                 throw new Exception($"User {id} not found");
 
@@ -80,15 +80,15 @@ namespace HealthCareApi.Services
                 throw new Exception("Route Id is differs user id");
             } 
 
-            User userDb = await _dataContext.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == id);
+            User userDb = await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == id);
 
-            if (userDb is null)
+            if (userDb == null)
             {
                 throw new Exception($"User {id} not found");
             }
 
-            _dataContext.Entry(userIn).State = EntityState.Modified;
-            await _dataContext.SaveChangesAsync();
+            _context.Entry(userIn).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
         }
     }
 }

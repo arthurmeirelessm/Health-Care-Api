@@ -1,3 +1,4 @@
+using HealthCareApi.Entities;
 using HealthCareApi.Helpers;
 using HealthCareApi.Services;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,8 @@ builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(build
 
 
 builder.Services.AddScoped<IUserService, UserService>();
-
+builder.Services.AddScoped<INoteForMedicalCareService, NoteForMedicalCareService>();
+builder.Services.AddScoped<ISpecialtyService, SpecialtyService>();
 
 var app = builder.Build();
 
