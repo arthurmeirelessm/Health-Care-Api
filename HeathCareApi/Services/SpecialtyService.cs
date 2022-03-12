@@ -87,6 +87,8 @@ namespace HealthCareApi.Services
                 throw new Exception($"Specialty {id} not found");
             }
 
+            specialtyIn.CreatedId = specialtyDb.CreatedId;
+
             _context.Entry(specialtyIn).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }

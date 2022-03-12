@@ -1,5 +1,6 @@
 ﻿using HealthCareApi.Enuns;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HealthCareApi.Entities
 {
@@ -36,8 +37,12 @@ namespace HealthCareApi.Entities
         [RegularExpression(@"^[a-zA-Z0-9''-'\s]{1,40}$", ErrorMessage =
          "Não padronização e caracteres especiais não são permitidos no campo de email.")]
         [StringLength(15, MinimumLength = 7, ErrorMessage =
-          "O Email deve ter no mínimo 7 e no máximo 15 caracteres.")]
+          "O Password deve ter no mínimo 7 e no máximo 15 caracteres.")]
         public string Password { get; set; }
+        [NotMapped]
+        public string ConfirmPassword { get; set; }
+        [NotMapped]
+        public string CurrentPassword { get; set; }
         public TypeUser TypeUser { get; set; }
     }
 }

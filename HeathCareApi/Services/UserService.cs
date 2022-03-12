@@ -1,7 +1,7 @@
 ﻿using HealthCareApi.Entities;
 using HealthCareApi.Helpers;
-
 using Microsoft.EntityFrameworkCore;
+using BC = BCrypt.Net.BCrypt;
 
 namespace HealthCareApi.Services
 {
@@ -28,12 +28,18 @@ namespace HealthCareApi.Services
 
         public async Task<User> Create(User user)
         {
+            if (!user.Password.Equals(user.ConfirmPassword))
+            {
+                throw new Exception("Password does not match confirmPassword");
+            }
             User userDb = await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserName == user.UserName);
 
             if (userDb != null)
             {
                 throw new Exception($"UserName {user.UserName} already exist.");
             }
+
+            user.Password = BC.HashPassword(user.Password);
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
@@ -79,6 +85,10 @@ namespace HealthCareApi.Services
             {
                 throw new Exception("Route Id is differs user id");
             } 
+            else if (!userIn.Password.Equals(userIn.ConfirmPassword))
+            {
+              throw new Exception("Password does not match confirmPassword");
+            }
 
             User userDb = await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == id);
 
@@ -86,7 +96,13 @@ namespace HealthCareApi.Services
             {
                 throw new Exception($"User {id} not found");
             }
+            else if (!BC.Verify(userIn.CurrentPassword, userDb.Password))
+            {
+                throw new Exception("Incorret Password");
+            }
 
+            userIn.CreatedId = userDb.CreatedId;
+            userIn.Password = BC.HashPassword(userIn.Password);
             _context.Entry(userIn).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }

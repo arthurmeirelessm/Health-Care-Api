@@ -82,6 +82,8 @@ namespace HealthCareApi.Services
                 throw new Exception($"NoteForMedicalCare {id} not found");
             }
 
+            noteIn.CreatedId = noteForMedicalCareDb.CreatedId;
+
             _context.Entry(noteIn).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }

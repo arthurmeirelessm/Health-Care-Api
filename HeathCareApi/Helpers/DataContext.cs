@@ -19,6 +19,25 @@ namespace HealthCareApi.Helpers
                 v => v.ToString(),
                 v => (TypeUser)Enum.Parse(typeof(TypeUser), v));
         }
+        public override Task<int> SaveChangesAsync(
+            bool acceptAllChangesOnSuccess,
+            CancellationToken cancellationToken = default)
+        {
+            var entries = ChangeTracker
+                .Entries()
+                .Where(e => e.Entity is BaseEntity && (
+                e.State == EntityState.Added
+                || e.State == EntityState.Modified));
+
+            foreach (var entityEntry in entries)
+            {
+                DateTime dateTime = DateTime.Now;
+                ((BaseEntity)entityEntry.Entity).UpdateAt = dateTime;
+                if (entityEntry.State == EntityState.Added)
+                    ((BaseEntity)entityEntry.Entity).CreatedId = dateTime;
+            }
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
 
 
         public DbSet<NoteForMedicalCare> NoteForMedicalCares { get; set; }
