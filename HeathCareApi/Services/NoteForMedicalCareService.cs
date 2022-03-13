@@ -1,4 +1,5 @@
 ﻿using HealthCareApi.Entities;
+using HealthCareApi.Exceptions;
 using HealthCareApi.Helpers;
 
 using Microsoft.EntityFrameworkCore;
@@ -41,7 +42,7 @@ namespace HealthCareApi.Services
 
             if (noteForMedicalCareDb == null)
             {
-                throw new Exception($"NoteForMedicalCare {id} not found");
+                throw new KeyNotFoundException($"NoteForMedicalCare {id} not found");
                
             }
             _context.NoteForMedicalCares.Remove(noteForMedicalCareDb);
@@ -60,7 +61,7 @@ namespace HealthCareApi.Services
 
             if (noteForMedicalCareDb == null)
             {
-                throw new Exception($"NoteForMedicalCare {id} not found");
+                throw new KeyNotFoundException($"NoteForMedicalCare {id} not found");
 
             }
             return noteForMedicalCareDb;
@@ -72,14 +73,14 @@ namespace HealthCareApi.Services
 
             if (noteIn.Id != id)
             {
-                throw new Exception("Route Id is differs NoteForMedicalCare id");
+                throw new BadRequestException("Route Id is differs NoteForMedicalCare id");
             } 
 
             NoteForMedicalCare noteForMedicalCareDb = await _context.NoteForMedicalCares.AsNoTracking().SingleOrDefaultAsync(u => u.Id == id);
 
             if (noteForMedicalCareDb == null)
             {
-                throw new Exception($"NoteForMedicalCare {id} not found");
+                throw new KeyNotFoundException($"NoteForMedicalCare {id} not found");
             }
 
             noteIn.CreatedId = noteForMedicalCareDb.CreatedId;

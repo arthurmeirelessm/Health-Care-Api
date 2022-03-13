@@ -1,5 +1,6 @@
 using HealthCareApi.Entities;
 using HealthCareApi.Helpers;
+using HealthCareApi.Middleware;
 using HealthCareApi.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +27,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ErrorHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 

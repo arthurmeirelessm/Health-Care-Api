@@ -1,4 +1,5 @@
 ﻿using HealthCareApi.Entities;
+using HealthCareApi.Exceptions;
 using HealthCareApi.Helpers;
 
 using Microsoft.EntityFrameworkCore;
@@ -32,7 +33,7 @@ namespace HealthCareApi.Services
 
             if (SpecialtyDb != null)
             {
-                throw new Exception($"SpecialtyName {specialty.NameForSpecialty} already exist.");
+                throw new BadRequestException($"SpecialtyName {specialty.NameForSpecialty} already exist.");
             }
             _context.Specialtys.Add(specialty);
             await _context.SaveChangesAsync();
@@ -46,7 +47,7 @@ namespace HealthCareApi.Services
 
             if (specialtyDb == null)
             {
-                throw new Exception($"Specialty {id} not found");
+                throw new KeyNotFoundException($"Specialty {id} not found");
                
             }
             _context.Specialtys.Remove(specialtyDb);
@@ -65,7 +66,7 @@ namespace HealthCareApi.Services
 
             if (specialtyDb == null)
             {
-                throw new Exception($"Specialty {id} not found");
+                throw new KeyNotFoundException($"Specialty {id} not found");
 
             }
             return specialtyDb;
@@ -77,14 +78,14 @@ namespace HealthCareApi.Services
 
             if (specialtyIn.Id != id)
             {
-                throw new Exception("Route Id is differs Specialty id");
+                throw new BadRequestException("Route Id is differs Specialty id");
             } 
 
             Specialty specialtyDb = await _context.Specialtys.AsNoTracking().SingleOrDefaultAsync(u => u.Id == id);
 
             if (specialtyDb == null)
             {
-                throw new Exception($"Specialty {id} not found");
+                throw new KeyNotFoundException($"Specialty {id} not found");
             }
 
             specialtyIn.CreatedId = specialtyDb.CreatedId;
