@@ -1,6 +1,8 @@
+using AutoMapper;
 using HealthCareApi.Entities;
 using HealthCareApi.Helpers;
 using HealthCareApi.Middleware;
+using HealthCareApi.Profiles;
 using HealthCareApi.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
@@ -24,6 +26,10 @@ builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(build
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<INoteForMedicalCareService, NoteForMedicalCareService>();
 builder.Services.AddScoped<ISpecialtyService, SpecialtyService>();
+
+var mapperConfig = MapperConfig.GetMapperConfig();
+IMapper mapper = mapperConfig.CreateMapper();
+builder.Services.AddSingleton(mapper);  
 
 var app = builder.Build();
 

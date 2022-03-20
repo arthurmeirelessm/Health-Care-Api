@@ -1,4 +1,6 @@
-﻿using HealthCareApi.Entities;
+﻿using AutoMapper;
+using HealthCareApi.Dto.User;
+using HealthCareApi.Entities;
 using HealthCareApi.Exceptions;
 using HealthCareApi.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -9,10 +11,10 @@ namespace HealthCareApi.Services
     public interface IUserService
     {
 
-        public Task<User> Create(User user);
-        public Task<User> GetById(int id);
-        public Task<List<User>> GetAll();
-        public Task Update(User userIn, int id);
+        public Task<UserResponse> Create(UserRequest userRequest);
+        public Task<UserResponse> GetById(int id);
+        public Task<List<UserResponse>> GetAll();
+        public Task Update(UserRequestUpdate userRequest, int id);
         public Task Delete(int id);
 
 
@@ -21,32 +23,47 @@ namespace HealthCareApi.Services
     {
 
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public UserService(DataContext dContext)
+        public UserService(DataContext dContext, IMapper mapper)
         {
             _context = dContext;
+            _mapper = mapper;
         }
 
-        public async Task<User> Create(User user)
+        public async Task<UserResponse> Create(UserRequest userRequest)
         {
             // Metodo equals() verifica se o que foi passado tem valores iguais, ou seja, o user.password e o user.ConfirmPassword
-            if (!user.Password.Equals(user.ConfirmPassword))
+            if (!userRequest.Password.Equals(userRequest.ConfirmPassword))
             {
                 throw new BadRequestException ("Password does not match confirmPassword");
             }
-            User userDb = await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserName == user.UserName);
+            User userDb = await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserName == userRequest.UserName);
 
             if (userDb != null)
             {
-                throw new BadRequestException($"UserName {user.UserName} already exist.");
+                throw new BadRequestException($"UserName {userRequest.UserName} already exist.");
             }
 
+            User user = _mapper.Map<User>(userRequest);
+
+            // O metodo Any() passado abaixo representa um validação de que o valor lá nos testes do postman da propriedade "SpecialtiesActivedIds" não foi passada como nula 
+            if (user.TypeUser != Enuns.TypeUser.Doctor && userRequest.SpecialtiesActivedIds.Any())
+            {
+                user.SpecialtiesActived = new List<Specialty>();
+                List<Specialty> specialties = await _context.Specialtys.Where(e => userRequest.SpecialtiesActivedIds.Contains(e.Id)).ToListAsync();
+                foreach (Specialty specialty in specialties )
+                {
+                    user.SpecialtiesActived.Add(specialty);
+                }
+             }
+
             //HashPassword criptografa 
-            user.Password = BC.HashPassword(user.Password);
+            userRequest.Password = BC.HashPassword(userRequest.Password);
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return user;
+            return _mapper.Map<UserResponse>(user);
         }
 
         public async Task Delete(int id)
@@ -63,32 +80,36 @@ namespace HealthCareApi.Services
 
         }
 
-        public async Task<List<User>> GetAll()
+        public async Task<List<UserResponse>> GetAll()
         {
-            return await _context.Users.ToListAsync();
+            List<User> users = await _context.Users.ToListAsync();
+            return users.Select(e => _mapper.Map<UserResponse>(e)).ToList();
         }
 
-        public async Task<User> GetById(int id)
+        public async Task<UserResponse> GetById(int id)
         {
-            User userDb = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
+            User userDb = await _context.Users
+                .Include(a => a.SpecialtiesActived) // Patient
+                .Include(a => a.SpecialtiesDoctorChiefing) //Doctor
+                .SingleOrDefaultAsync(u => u.Id == id);
 
             if (userDb == null)
             {
                 throw new KeyNotFoundException($"User {id} not found");
 
             }
-            return userDb;
+            return _mapper.Map<UserResponse>(userDb);
 
         }
 
-        public async Task Update(User userIn, int id)
+        public async Task Update(UserRequestUpdate userRequest, int id)
         {
 
-            if (userIn.Id != id)
+            if (userRequest.Id != id)
             {
                 throw new BadRequestException("Route Id is differs user id");
             } 
-            else if (!userIn.Password.Equals(userIn.ConfirmPassword))
+            else if (!userRequest.Password.Equals(userRequest.ConfirmPassword))
             {
               throw new BadRequestException("Password does not match confirmPassword");
             }
@@ -99,15 +120,48 @@ namespace HealthCareApi.Services
             {
                 throw new KeyNotFoundException($"User {id} not found");
             }
-            else if (!BC.Verify(userIn.CurrentPassword, userDb.Password))
+            else if (!BC.Verify(userRequest.CurrentPassword, userDb.Password))
             {
                 throw new BadRequestException("Incorret Password");
             }
 
-            userIn.CreatedId = userDb.CreatedId;
-            userIn.Password = BC.HashPassword(userIn.Password);
-            _context.Entry(userIn).State = EntityState.Modified;
+            userDb = _mapper.Map<User>(userRequest); // talvez o createdId possa ser default
+
+            await AddOrRemoveSpecialty(userDb, userRequest.SpecialtiesActivedIds);
+
+            userDb.Password = BC.HashPassword(userRequest.Password);
+            _context.Entry(userDb).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+        }
+
+        private async Task AddOrRemoveSpecialty(User userDb, int[] specialtiesIds)
+        {
+            int[] removedIds = userDb.SpecialtiesActived.Where(e => !specialtiesIds.Contains(e.Id)).Select(e => e.Id).ToArray();
+            int[] addedIds = specialtiesIds.Where(e => !userDb.SpecialtiesActived.Select(u => u.Id).ToArray().Contains(e)).ToArray();
+
+            if (!removedIds.Any() && !addedIds.Any())
+            {
+                _context.Entry(userDb).State = EntityState.Detached;
+                return;
+            }
+
+            List<Specialty> tempSpecialty = await _context.Specialtys.Where(e => removedIds.Contains(e.Id) || addedIds.Contains(e.Id)).ToListAsync();
+
+
+            List<Specialty> specialtyToBeRemoved = tempSpecialty.Where(c => removedIds.Contains(c.Id)).ToList();
+            foreach (Specialty specialty in specialtyToBeRemoved)
+            {
+                userDb.SpecialtiesActived.Remove(specialty);
+            }
+
+            List<Specialty> specialtyToBeAdded = tempSpecialty.Where(c => addedIds.Contains(c.Id)).ToList();
+            foreach (Specialty specialty in specialtyToBeAdded)
+            {
+                userDb.SpecialtiesActived.Add(specialty);
+            }
+
+            await _context.SaveChangesAsync();
+            _context.Entry(userDb).State = EntityState.Detached;
         }
     }
 }
