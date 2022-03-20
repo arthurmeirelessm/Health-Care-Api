@@ -1,6 +1,7 @@
 ﻿using HealthCareApi.Enuns;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace HealthCareApi.Entities
 {
@@ -44,5 +45,10 @@ namespace HealthCareApi.Entities
         [NotMapped]
         public string CurrentPassword { get; set; }
         public TypeUser TypeUser { get; set; }
+        public ICollection<Specialty> SpecialtiesDoctorChiefing { get; set; }
+        [JsonIgnore]
+        public ICollection<Specialty> SpecialtiesActived { get; set; }
+        [JsonIgnore]
+        public List<PatientSpecialty> PatientSpecialties { get;}
     }
 }

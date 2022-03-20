@@ -18,6 +18,28 @@ namespace HealthCareApi.Helpers
                 .HasConversion(
                 v => v.ToString(),
                 v => (TypeUser)Enum.Parse(typeof(TypeUser), v));
+
+            builder.Entity<Specialty>()
+                .HasOne(e => e.Doctor)
+                .WithMany(c => c.SpecialtiesDoctorChiefing)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Specialty>()
+               .HasMany(p => p.Patients)
+               .WithMany(t => t.SpecialtiesActived)
+               .UsingEntity<PatientSpecialty>(
+                j => j
+                     .HasOne(pt => pt.Patient)
+                     .WithMany(t => t.PatientSpecialties)
+                     .HasForeignKey(pt => pt.PatientId),
+                j => j
+                     .HasOne(pt => pt.Specialty)
+                     .WithMany(p => p.PatientSpecialties)
+                     .HasForeignKey(pt => pt.SpecialtyId),
+                j =>
+                {
+                    j.HasKey(t => new { t.SpecialtyId, t.PatientId });
+                });
         }
         public override Task<int> SaveChangesAsync(
             bool acceptAllChangesOnSuccess,
