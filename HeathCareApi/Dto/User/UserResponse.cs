@@ -36,9 +36,9 @@ namespace HealthCareApi.Dto.User
           "O UserName deve ter no mínimo 7 e no máximo 15 caracteres.")]
         public string UserName { get; set; }
         public TypeUser TypeUser { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt  { get; set; }
-        public List<Specialty> SpecialtiesActived { get; set; } //TypeUser == Patient
-        public List<Specialty> SpecialtiesDoctorChiefing { get; set; } //TypeUser == Doctor
+        public DateTime CreatedId { get; set; }
+        public DateTime UpdateAt  { get; set; }
+        public List<Entities.Specialty> SpecialtiesActived { get; set; } //TypeUser == Patient
+        public List<Entities.Specialty> SpecialtiesDoctorChiefing { get; set; } //TypeUser == Doctor
     }
 }

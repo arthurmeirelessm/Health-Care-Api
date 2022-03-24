@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace HealthCareApi.Migrations
 {
-    public partial class ImplementedRelationchip : Migration
+    public partial class newMigrationForManutentigOfDateTimes : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -59,7 +59,7 @@ namespace HealthCareApi.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
+                    PatientId = table.Column<int>(type: "int", nullable: false),
                     SpecialtyId = table.Column<int>(type: "int", nullable: false),
                     Note = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CreatedId = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -75,8 +75,8 @@ namespace HealthCareApi.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_NoteForMedicalCares_Users_UserId",
-                        column: x => x.UserId,
+                        name: "FK_NoteForMedicalCares_Users_PatientId",
+                        column: x => x.PatientId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -107,14 +107,14 @@ namespace HealthCareApi.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_NoteForMedicalCares_PatientId",
+                table: "NoteForMedicalCares",
+                column: "PatientId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_NoteForMedicalCares_SpecialtyId",
                 table: "NoteForMedicalCares",
                 column: "SpecialtyId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_NoteForMedicalCares_UserId",
-                table: "NoteForMedicalCares",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PatientSpecialty_PatientId",

@@ -1,4 +1,7 @@
-﻿using HealthCareApi.Entities;
+﻿using AutoMapper;
+using HealthCareApi.Dto.Note;
+using HealthCareApi.Dto.User;
+using HealthCareApi.Entities;
 using HealthCareApi.Exceptions;
 using HealthCareApi.Helpers;
 
@@ -9,10 +12,10 @@ namespace HealthCareApi.Services
     public interface INoteForMedicalCareService
     {
 
-        public Task<NoteForMedicalCare> Create(NoteForMedicalCare note);
-        public Task<NoteForMedicalCare> GetById(int id);
-        public Task<List<NoteForMedicalCare>> GetAll();
-        public Task Update(NoteForMedicalCare noteIn, int id);
+        public Task<NoteForMedicalCareResponse> Create(NoteForMedicalCareRequest noteRequest);
+        public Task<NoteForMedicalCareResponse> GetById(int id);
+        public Task<List<NoteForMedicalCareResponse>> GetAll();
+        public Task Update(NoteForMedicalCareRequest noteRequest, int id);
         public Task Delete(int id);
 
 
@@ -21,19 +24,23 @@ namespace HealthCareApi.Services
     {
 
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public NoteForMedicalCareService(DataContext dContext)
+        public NoteForMedicalCareService(DataContext dContext, IMapper mapper)
         {
             _context = dContext;
+            _mapper = mapper;   
         }
 
-        public async Task<NoteForMedicalCare> Create(NoteForMedicalCare note)
+        public async Task<NoteForMedicalCareResponse> Create(NoteForMedicalCareRequest noteRequest)
         {
             
+           NoteForMedicalCare note = _mapper.Map<NoteForMedicalCare>(noteRequest);
+
             _context.NoteForMedicalCares.Add(note);
             await _context.SaveChangesAsync();
 
-            return note;
+            return _mapper.Map<NoteForMedicalCareResponse>(note);
         }
 
         public async Task Delete(int id)
@@ -50,12 +57,13 @@ namespace HealthCareApi.Services
 
         }
 
-        public async Task<List<NoteForMedicalCare>> GetAll()
+        public async Task<List<NoteForMedicalCareResponse>> GetAll()
         {
-            return await _context.NoteForMedicalCares.ToListAsync();
+            List<NoteForMedicalCare> notes =  await _context.NoteForMedicalCares.ToListAsync();
+            return notes.Select(n => _mapper.Map<NoteForMedicalCareResponse>(n)).ToList();
         }
 
-        public async Task<NoteForMedicalCare> GetById(int id)
+        public async Task<NoteForMedicalCareResponse> GetById(int id)
         {
             NoteForMedicalCare noteForMedicalCareDb = await _context.NoteForMedicalCares.SingleOrDefaultAsync(u => u.Id == id);
 
@@ -64,14 +72,14 @@ namespace HealthCareApi.Services
                 throw new KeyNotFoundException($"NoteForMedicalCare {id} not found");
 
             }
-            return noteForMedicalCareDb;
+            return _mapper.Map<NoteForMedicalCareResponse>(noteForMedicalCareDb);   
 
         }
 
-        public async Task Update(NoteForMedicalCare noteIn, int id)
+        public async Task Update(NoteForMedicalCareRequest noteRequest, int id)
         {
 
-            if (noteIn.Id != id)
+            if (noteRequest.Id != id)
             {
                 throw new BadRequestException("Route Id is differs NoteForMedicalCare id");
             } 
@@ -82,10 +90,10 @@ namespace HealthCareApi.Services
             {
                 throw new KeyNotFoundException($"NoteForMedicalCare {id} not found");
             }
+            // mapper converte o response do método, convervete de entidade para N
+            noteForMedicalCareDb = _mapper.Map<NoteForMedicalCare>(noteRequest);
 
-            noteIn.CreatedId = noteForMedicalCareDb.CreatedId;
-
-            _context.Entry(noteIn).State = EntityState.Modified;
+            _context.Entry(noteForMedicalCareDb).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
     }

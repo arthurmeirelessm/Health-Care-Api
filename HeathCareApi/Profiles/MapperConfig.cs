@@ -9,6 +9,8 @@ namespace HealthCareApi.Profiles
             return new MapperConfiguration(mc =>
             {
             mc.AddProfile(new UserProfile());
+            mc.AddProfile(new NoteForMedicalCareProfile());
+
             });
         }
     }
