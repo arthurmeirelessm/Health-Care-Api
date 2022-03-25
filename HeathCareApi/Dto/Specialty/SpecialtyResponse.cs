@@ -25,9 +25,10 @@ namespace HealthCareApi.Dto.Specialty
         [RegularExpressionAttribute(@"^([0-9]{1,3})([.,][0-9]{1,2})?$", ErrorMessage =
         "Digite o preço da consulta em forma de decimal.")]
         public decimal PriceOfConsult { get; set; }
- public DateTime CreatedId { get; set; }
-        public DateTime UpdateAt { get; set; }
         public Entities.User Doctor { get; set; }
-       
+        public DateTime CreatedId { get; set; }
+        public DateTime UpdateAt { get; set; }
+        public ICollection<Entities.User> Patients { get; set; }
+
     }
 }
