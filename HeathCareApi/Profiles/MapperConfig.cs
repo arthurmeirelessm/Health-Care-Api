@@ -10,7 +10,7 @@ namespace HealthCareApi.Profiles
             {
             mc.AddProfile(new UserProfile());
             mc.AddProfile(new NoteForMedicalCareProfile());
-            mc.AddProfile(new NoteForMedicalCareProfile());
+            mc.AddProfile(new SpecialtyProfile());
             });
         }
     }

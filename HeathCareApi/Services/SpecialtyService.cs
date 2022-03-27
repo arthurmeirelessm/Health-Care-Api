@@ -64,7 +64,7 @@ namespace HealthCareApi.Services
 
         public async Task<SpecialtyResponse> GetById(int id)
         {
-            Specialty specialtyDb = await _context.Specialtys.SingleOrDefaultAsync(u => u.Id == id);
+            Specialty specialtyDb = await _context.Specialtys.Include(c => c.Doctor).SingleOrDefaultAsync(u => u.Id == id);
 
             if (specialtyDb == null)
             {

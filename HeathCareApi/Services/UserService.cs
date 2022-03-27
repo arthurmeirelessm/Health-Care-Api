@@ -48,15 +48,18 @@ namespace HealthCareApi.Services
             User user = _mapper.Map<User>(userRequest);
 
             // O metodo Any() passado abaixo representa um validação de que o valor lá nos testes do postman da propriedade "SpecialtiesActivedIds" não foi passada como nula 
-            if (user.TypeUser != Enuns.TypeUser.Doctor && userRequest.SpecialtiesActivedIds.Any())
+            if (user.TypeUser != Enuns.TypeUser.Patient && userRequest.SpecialtiesActivedIds.Any())
             {
-                user.SpecialtiesActived = new List<Specialty>();
-                List<Specialty> specialties = await _context.Specialtys.Where(e => userRequest.SpecialtiesActivedIds.Contains(e.Id)).ToListAsync();
-                foreach (Specialty specialty in specialties )
-                {
-                    user.SpecialtiesActived.Add(specialty);
-                }
+                throw new BadRequestException("Only patients can have a history with specialties");
              }
+
+               user.SpecialtiesActived = new List<Specialty>();
+               List<Specialty> specialties = await _context.Specialtys.Where(e => userRequest.SpecialtiesActivedIds.Contains(e.Id)).ToListAsync();
+               foreach (Specialty specialty in specialties)
+               {
+                    user.SpecialtiesActived.Add(specialty);
+               }
+ 
 
             //HashPassword criptografa 
             userRequest.Password = BC.HashPassword(userRequest.Password);

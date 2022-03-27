@@ -10,7 +10,10 @@ namespace HealthCareApi.Profiles
         {
             CreateMap<Specialty, SpecialtyRequest>();
             CreateMap<Specialty, SpecialtyResponse>();
-            
+
+            CreateMap<SpecialtyRequest, Specialty>();
+            CreateMap<SpecialtyResponse, Specialty>();
+
         }
     }
 }

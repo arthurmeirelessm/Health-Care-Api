@@ -45,10 +45,11 @@ namespace HealthCareApi.Entities
         [NotMapped]
         public string CurrentPassword { get; set; }
         public TypeUser TypeUser { get; set; }
+        [JsonIgnore]
         public ICollection<Specialty> SpecialtiesDoctorChiefing { get; set; }
         [JsonIgnore]
         public ICollection<Specialty> SpecialtiesActived { get; set; }
         [JsonIgnore]
-        public List<PatientSpecialty> PatientSpecialties { get;}
+        public List<PatientSpecialty> PatientSpecialties { get; set; }
     }
 }

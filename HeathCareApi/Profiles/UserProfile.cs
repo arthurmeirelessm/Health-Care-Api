@@ -11,6 +11,10 @@ namespace HealthCareApi.Profiles
             CreateMap<User, UserRequest>();
             CreateMap<User, UserRequestUpdate>();
             CreateMap<User, UserResponse>();
+
+            CreateMap<UserRequest, User>();
+            CreateMap<UserRequestUpdate, User>();
+            CreateMap<UserResponse, User>();
         }
     }
 }

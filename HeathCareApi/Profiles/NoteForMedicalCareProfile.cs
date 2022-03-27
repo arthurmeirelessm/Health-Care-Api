@@ -11,6 +11,10 @@ namespace HealthCareApi.Profiles
         {
             CreateMap<NoteForMedicalCare, NoteForMedicalCareRequest>();
             CreateMap<NoteForMedicalCare, NoteForMedicalCareResponse>();
+
+            CreateMap<NoteForMedicalCareRequest, NoteForMedicalCare>();
+            CreateMap<NoteForMedicalCareResponse, NoteForMedicalCare>();
+
         }
     }
 }
