@@ -1,11 +1,11 @@
 using AutoMapper;
-using HealthCareApi.Entities;
+using Microsoft.EntityFrameworkCore;
 using HealthCareApi.Helpers;
 using HealthCareApi.Middleware;
 using HealthCareApi.Profiles;
 using HealthCareApi.Services;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using HealthCareApi.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,16 +20,25 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
+builder.Services.AddDbContext<DataContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<INoteForMedicalCareService, NoteForMedicalCareService>();
 builder.Services.AddScoped<ISpecialtyService, SpecialtyService>();
 
 var mapperConfig = MapperConfig.GetMapperConfig();
 IMapper mapper = mapperConfig.CreateMapper();
-builder.Services.AddSingleton(mapper);  
+builder.Services.AddSingleton(mapper);
+
 
 var app = builder.Build();
 
@@ -41,6 +50,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ErrorHandlerMiddleware>();
+app.UseMiddleware<JwtMiddleware>();
 
 app.UseHttpsRedirection();
 

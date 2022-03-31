@@ -3,33 +3,45 @@ using HealthCareApi.Dto.User;
 using HealthCareApi.Entities;
 using HealthCareApi.Exceptions;
 using HealthCareApi.Helpers;
+using HealthCareApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using BC = BCrypt.Net.BCrypt;
 
 namespace HealthCareApi.Services
 {
-    public interface IUserService
-    {
-
-        public Task<UserResponse> Create(UserRequest userRequest);
-        public Task<UserResponse> GetById(int id);
-        public Task<List<UserResponse>> GetAll();
-        public Task Update(UserRequestUpdate userRequest, int id);
-        public Task Delete(int id);
-
-
-    }
+   
     public class UserService : IUserService
     {
 
         private readonly DataContext _context;
         private readonly IMapper _mapper;
+        private readonly JwtService _jwtService;
 
-        public UserService(DataContext dContext, IMapper mapper)
+        public UserService(DataContext dContext, IMapper mapper, JwtService jwtService)
         {
             _context = dContext;
             _mapper = mapper;
+            _jwtService = jwtService;
         }
+
+        public async Task<AuthenticateResponse> Authenticate(AuthenticateRequest request)
+        {
+
+            var userDb = await _context.Users.SingleOrDefaultAsync(u => u.UserName == request.UserName);
+
+            if (userDb == null)
+            {
+                throw new KeyNotFoundException($"User {request.UserName} not found");
+            }
+            else if (!BC.Verify(request.Password, userDb.Password))
+            {
+                throw new BadRequestException("Incorret Password");
+            }
+
+            string token = _jwtService.GenerateToken(userDb);
+            return new AuthenticateResponse(userDb, token);
+        }
+
 
         public async Task<UserResponse> Create(UserRequest userRequest)
         {
@@ -38,7 +50,7 @@ namespace HealthCareApi.Services
             {
                 throw new BadRequestException ("Password does not match confirmPassword");
             }
-            User userDb = await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserName == userRequest.UserName);
+            var userDb = await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserName == userRequest.UserName);
 
             if (userDb != null)
             {
@@ -71,7 +83,7 @@ namespace HealthCareApi.Services
 
         public async Task Delete(int id)
         {
-            User userDb = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
+            var userDb = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
 
             if (userDb == null)
             {
@@ -91,7 +103,7 @@ namespace HealthCareApi.Services
 
         public async Task<UserResponse> GetById(int id)
         {
-            User userDb = await _context.Users
+            var userDb = await _context.Users
                 .Include(a => a.SpecialtiesActived) // Patient
                 .Include(a => a.SpecialtiesDoctorChiefing) //Doctor
                 .SingleOrDefaultAsync(u => u.Id == id);
@@ -117,7 +129,7 @@ namespace HealthCareApi.Services
               throw new BadRequestException("Password does not match confirmPassword");
             }
 
-            User userDb = await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == id);
+            var userDb = await _context.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == id);
 
             if (userDb == null)
             {

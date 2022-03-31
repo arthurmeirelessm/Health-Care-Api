@@ -1,10 +1,13 @@
+using HealthCareApi.Authorization;
 using HealthCareApi.Dto.User;
 using HealthCareApi.Entities;
 using HealthCareApi.Services;
+using HealthCareApi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HealthCareApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
@@ -16,10 +19,14 @@ namespace HealthCareApi.Controllers
             _service = service;
         }
 
-
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] UserRequest userRequest) => Ok(await _service.Create(userRequest));
 
+
+        [AllowAnonymous]
+        [HttpPost("Authenticate")]
+        public async Task<IActionResult> Authenticate([FromBody] AuthenticateRequest request) => Ok(await _service.Authenticate(request));
         [HttpGet]
         public async Task<IActionResult> GetAll() => Ok(await _service.GetAll());
 

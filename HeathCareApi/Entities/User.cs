@@ -34,16 +34,12 @@ namespace HealthCareApi.Entities
         [StringLength(15, MinimumLength = 7, ErrorMessage =
           "O UserName deve ter no mínimo 7 e no máximo 15 caracteres.")]
         public string UserName { get; set; }
-
+        [JsonIgnore]
         [RegularExpression(@"^[a-zA-Z0-9''-'\s]{1,40}$", ErrorMessage =
          "Não padronização e caracteres especiais não são permitidos no campo de email.")]
         [StringLength(15, MinimumLength = 7, ErrorMessage =
           "O Password deve ter no mínimo 7 e no máximo 15 caracteres.")]
         public string Password { get; set; }
-        [NotMapped]
-        public string ConfirmPassword { get; set; }
-        [NotMapped]
-        public string CurrentPassword { get; set; }
         public TypeUser TypeUser { get; set; }
         [JsonIgnore]
         public ICollection<Specialty> SpecialtiesDoctorChiefing { get; set; }

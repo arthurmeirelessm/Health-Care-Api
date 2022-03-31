@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthCareApi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220324044338_newMigrationForManutentigOfDateTimes")]
-    partial class newMigrationForManutentigOfDateTimes
+    [Migration("20220329005844_FinishedMigration")]
+    partial class FinishedMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

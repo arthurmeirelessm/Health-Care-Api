@@ -6,9 +6,24 @@ namespace HealthCareApi.Helpers
 {
     public class DataContext : DbContext
     {
+        public DataContext()
+        {
+        }
 
-        public DataContext(DbContextOptions<DataContext> options) : base(options) { }
-           
+        public DataContext(DbContextOptions options) : base(options) {}
+
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        {
+
+            if (!options.IsConfigured)
+
+            {
+
+                options.UseSqlServer("A FALLBACK CONNECTION STRING");
+
+            }
+
+        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -41,9 +56,7 @@ namespace HealthCareApi.Helpers
                     j.HasKey(t => new { t.SpecialtyId, t.PatientId });
                 });
         }
-        public override Task<int> SaveChangesAsync(
-            bool acceptAllChangesOnSuccess,
-            CancellationToken cancellationToken = default)
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
             var entries = ChangeTracker
                 .Entries()

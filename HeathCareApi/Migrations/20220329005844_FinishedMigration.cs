@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace HealthCareApi.Migrations
 {
-    public partial class newMigrationForManutentigOfDateTimes : Migration
+    public partial class FinishedMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
